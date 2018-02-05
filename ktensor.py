@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 from dtensor import DecomposedTensor
 from utils import nvecs, bilinear
+import functools
 
 
 class KruskalTensor(DecomposedTensor):
@@ -58,7 +59,7 @@ class KruskalTensor(DecomposedTensor):
 
         """
         with tf.name_scope('X'):
-            reduced = reduce(bilinear, self.U[1:][::-1])
+            reduced = functools.reduce(bilinear, self.U[1:][::-1])
             rs = reduced.shape.as_list()
             reduced = tf.reshape(reduced, [np.prod(rs[:-1]), rs[-1]])
 

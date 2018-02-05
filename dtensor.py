@@ -1,6 +1,5 @@
 
 import tensorflow as tf
-from tqdm import trange
 from utils import shuffled, get_fit
 
 import logging
@@ -36,15 +35,17 @@ class DecomposedTensor:
 
         init_op = tf.global_variables_initializer()
 
-        with tf.Session() as sess:
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
             sess.run(init_op)
 
-            for e in trange(epochs):
+            for e in epochs:
                 for alt, train_op in enumerate(shuffled(train_ops)):
                     _, loss = sess.run([train_op, loss_op], feed_dict={X_var: X_data})
                     _log.debug('[%3d:%3d] loss: %.5f' % (e, alt, loss))
 
-            print 'final loss: %.5f' % loss
+            print('final loss: %.5f' % loss)
             return sess.run(self.X)
 
     def train_als_early(self, X_data, optimizer, epochs=1000, stop_freq=50, stop_thresh=1e-10):
@@ -58,10 +59,12 @@ class DecomposedTensor:
 
         init_op = tf.global_variables_initializer()
 
-        with tf.Session() as sess:
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        with tf.Session(config=config) as sess:
             sess.run(init_op)
 
-            for e in trange(epochs):
+            for e in epochs:
                 for alt, train_op in enumerate(shuffled(train_ops)):
                     _, loss = sess.run([train_op, loss_op], feed_dict={X_var: X_data})
                     _log.debug('[%3d:%3d] loss: %.5f' % (e, alt, loss))
@@ -72,9 +75,9 @@ class DecomposedTensor:
                     fit_change = abs(fit - fit_prev)
 
                     if fit_change < stop_thresh and e > 0:
-                        print 'Stopping early, fit_change: %.10f' % (fit_change)
+                        print('Stopping early, fit_change: %.10f' % (fit_change))
                         break
                     fit_prev = fit
 
-            print 'final loss: %.5f\nfinal fit %.5f' % (loss, fit)
+            print('final loss: %.5f\nfinal fit %.5f' % (loss, fit))
             return sess.run(self.X)
