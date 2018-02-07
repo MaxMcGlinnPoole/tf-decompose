@@ -1,7 +1,6 @@
 
 import tensorflow as tf
 import numpy as np
-from tqdm import trange
 from dtensor import DecomposedTensor, _log
 from utils import nvecs, shuffled, get_fit, refold_tf, unfold_tf
 
@@ -94,7 +93,7 @@ class TuckerTensor(DecomposedTensor):
         with tf.Session(config=config) as sess:
             sess.run(init_op)
 
-            for n in shuffled(trange(self.order)):
+            for n in shuffled(self.order):
                 _,u,_ = tf.svd(unfold_tf(X_var, n), name='svd%3d' % n)
 
                 # Set U[n] to the first ranks[n] left-singular values of X
@@ -152,7 +151,7 @@ class TuckerTensor(DecomposedTensor):
         config.gpu_options.allow_growth = True
         with tf.Session(config=config) as sess:
             sess.run(init_op)
-            for e in trange(epochs):
+            for e in epochs:
 
                 # Set up orthogonal iteration operators
                 for n in range(self.order):
@@ -160,7 +159,7 @@ class TuckerTensor(DecomposedTensor):
                     _,u,_ = tf.svd(unfold_tf(Y, n), name='svd%3d' % n)
                     svd_ops[n] = tf.assign(self.U[n], u[:, :self.ranks[n]])
 
-                for n in shuffled(trange(self.order)):
+                for n in shuffled(self.order):
                     sess.run([svd_ops[n]], feed_dict={X_var: X_data})
 
                     X_predict = sess.run(self.X)
